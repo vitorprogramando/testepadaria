@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cardápio da Quentinha</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+li {
+    margin-bottom: 10px;
+}
+.acompanhamento-label {
+    display: flex;
+    align-items: center;
+}
+.acompanhamento-label input[type="checkbox"] {
+    margin-right: 10px;
+}
+@media (max-width: 768px) {
+    .acompanhamento-label {
+        font-size: 0.9em;
+    }
+}
+</style>
+</head>
+<body>
+<div style="max-width: 800px; margin: 0 auto; padding: 20px;"><h1>Cardápio da Quentinha</h1>
+<form id="pedidoForm" action="processar_pedido.php" method="post">
+<label for="nomeCliente">Nome do Cliente:</label><br>
+<input type="text" id="nomeCliente" name="nomeCliente" required><br><br>
+<label for="nomeEmpresa">Nome da Empresa:</label><br>
+<input type="text" id="nomeEmpresa" name="nomeEmpresa" required><br><br>
+<h2>Acompanhamentos</h2>
+<ul>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="1"> fava verde - </label>
+</li>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="2"> batata - </label>
+</li>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="3"> vitor - </label>
+</li>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="4"> melancia - </label>
+</li>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="5"> abacaxi - </label>
+</li>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="6"> macarrão - </label>
+</li>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="7"> beterraca - </label>
+</li>
+<li>
+<label class="acompanhamento-label"><input class="acompanhamento-checkbox" type="checkbox" name="acompanhamentos[]" value="8"> rubacão - </label>
+</li>
+</ul>
+<h2>Escolha a Quentinha</h2>
+<select name="quentinha" id="quentinha">
+<option value="0">Sem Quentinha - R$ 0,00</option>
+<option value="10">Quentinha Pequena - R$ 10,00</option>
+<option value="15">Quentinha Grande - R$ 15,00</option>
+</select>
+<h2>Escolha a Bebida</h2>
+<select name="bebida" id="bebida">
+<option value="0">Sem Bebida - R$ 0,00</option>
+<option value="3">Água - R$ 3,00</option>
+<option value="5">Refrigerante - R$ 5,00</option>
+</select>
+<br><br>
+<button type="button" onclick="addToCart()">Adicionar ao Carrinho</button>
+</form>
+<div id="cart-items"></div>
+<button id="btn-whatsapp" onclick="sendWhatsApp()" style="display: none;">Enviar Pedido via WhatsApp</button>
+<script>
+function addToCart() {
+    var form = document.getElementById('pedidoForm');
+    var checkboxes = form.getElementsByClassName('acompanhamento-checkbox');
+    var cartList = document.getElementById('cart-items');
+    cartList.innerHTML = ''; // Limpa a lista de itens do carrinho
+    var total = 0;
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            var acompanhamentoName = checkboxes[i].parentNode.textContent.trim().split(' - ')[0].trim(); // Obtém o nome do acompanhamento sem o preço
+            var li = document.createElement('li');
+            li.textContent = acompanhamentoName;
+            cartList.appendChild(li);
+        }
+    }
+    var quentinha = form.elements['quentinha'].value;
+    if (quentinha !== '0') {
+        var quentinhaOption = form.elements['quentinha'].options[form.elements['quentinha'].selectedIndex].text;
+        var liQuentinha = document.createElement('li');
+        liQuentinha.textContent = quentinhaOption;
+        cartList.appendChild(liQuentinha);
+        total += parseFloat(quentinha);
+    }
+    var bebida = form.elements['bebida'].value;
+    if (bebida !== '0') {
+        var bebidaOption = form.elements['bebida'].options[form.elements['bebida'].selectedIndex].text;
+        var liBebida = document.createElement('li');
+        liBebida.textContent = bebidaOption;
+        cartList.appendChild(liBebida);
+        total += parseFloat(bebida);
+    }
+    var totalElement = document.createElement('li');
+    totalElement.textContent = 'Total: R$ ' + total.toFixed(2);
+    totalElement.id = 'total';
+    cartList.appendChild(totalElement);
+    document.getElementById('btn-whatsapp').style.display = 'block';
+}
+function sendWhatsApp() {
+    var form = document.getElementById('pedidoForm');
+    var cliente = form.elements['nomeCliente'].value;
+    var empresa = form.elements['nomeEmpresa'].value;
+    var items = document.getElementById('cart-items').innerText;
+    var message = encodeURIComponent('Olá, gostaria de fazer o pedido para ' + cliente + ' da empresa ' + empresa + ' com os seguintes itens: ' + items);
+    var whatsapp_url = 'https://api.whatsapp.com/send?phone=SEU_NUMERO_DE_WHATSAPP&text=' + message;
+    window.open(whatsapp_url, '_blank');
+}
+</script>
+</div>
+</body>
+</html>
